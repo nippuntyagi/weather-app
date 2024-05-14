@@ -1,14 +1,11 @@
-import { cn } from "@/utils/cn";
-import Image from "next/image";
 import React from "react";
-import Container from "./Container";
 import { SingleWeatherDetailProps } from "@/interfaces/weather";
 import { LuEye, LuSunrise, LuSunset } from "react-icons/lu";
 import { ImMeter } from "react-icons/im";
 import { MdAir } from "react-icons/md";
 import { FiDroplet } from "react-icons/fi";
 
-type WeatherDetailProps  = {
+export interface WeatherDetailProps {
 	visability: string;
 	humidity: string;
 	windSpeed: string;
