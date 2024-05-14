@@ -57,3 +57,10 @@ interface CityInfo {
 	sunrise: number;
 	sunset: number;
 }
+
+
+export interface SingleWeatherDetailProps {
+	information: string,
+	icon: React.ReactNode,
+	value: string
+}

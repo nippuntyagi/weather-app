@@ -4,12 +4,14 @@ import { weatherInfo } from "@/api/weatherData";
 import Container from "@/components/Container";
 import Navbar from "@/components/Navbar";
 import { WeatherData } from "@/interfaces/weather";
-import { parseISO } from "date-fns";
+import { fromUnixTime, parseISO } from "date-fns";
 import { format } from "date-fns/format";
 import { useQuery } from "react-query";
 import { convertKalvinToCelsius } from "@/utils/convertKalvinToCelsius"
 import WeatherIcon from "@/components/WeatherIcon";
 import { getDayOrNightIcon } from "@/utils/getDayNightIcons";
+import WeatherDetails from "@/components/WeatherDetails";
+import { convertWindSpeed, meterToKm } from "@/utils/conversions";
 
 export default function Home() {
   const { isLoading, error, data } = useQuery<WeatherData>('WeatherData', async () =>
@@ -17,16 +19,24 @@ export default function Home() {
       return await weatherInfo();
     }
   )
-  if (isLoading) return (
-    <div className="flex item-center min-h-screen justify-center">
-      <p className="animate-bounce">
-        loading...
-      </p>
-    </div>
-  )
+
   const firstData = data?.list[0]
+
+  if (isLoading)
+    return (
+      <div className="flex items-center min-h-screen justify-center">
+        <p className="animate-bounce">Loading...</p>
+      </div>
+    );
+  if (error)
+    return (
+      <div className="flex items-center min-h-screen justify-center">
+        {/* @ts-ignore */}
+        <p className="text-red-400">{error.message}</p>
+      </div>
+    );
   return (
-    <div className="flex flex-col gap-4 bg-grey-100 min-h-screen">
+    <div className="flex flex-col gap-4 bg-gray-100 min-h-screen">
       <Navbar />
       <main className="px-3 max-w-7xl mx-auto flex flex-col gap-9 w-full pb-10 pt-4">
         <section className="space-y-4">
@@ -72,8 +82,30 @@ export default function Home() {
               </div>
             </Container>
           </div>
+          <div className="flex gap-4 ">
+            {/* {left} */}
+            <Container className="w-fit justify-center flex-col px-4 items-center">
+              <p className="capitalize text-center">{firstData?.weather[0].description}</p>
+              <WeatherIcon iconName={getDayOrNightIcon(firstData?.weather[0].icon ?? "", firstData?.dt_txt ?? "")}/>
+            </Container>
+            {/* {right} */}
+            <Container className="bg-yellow-300/80 px-6 gap-4 justify-between overflow-x-auto">
+                <WeatherDetails 
+                  visability = {meterToKm(firstData?.visibility ?? 10000)}
+                  humidity = {`${firstData?.main.humidity}%`}
+                  windSpeed = {convertWindSpeed(firstData?.wind.speed ?? 1.64)}
+                  airPressure = {`${firstData?.main.pressure} hPa`}
+                  sunrise = {format(fromUnixTime(data?.city.sunrise ?? 1702949452), 'H:mm')}
+                  sunset = {format(fromUnixTime(data?.city.sunset ?? 1702517657), 'H:mm')}
+                />
+            </Container>
+
+          </div>
         </section>
-        <section></section>
+        <section className="flex w-full flex-col gap-4">
+          <p className="text-2xl">Forcast (7 Days)</p>
+
+        </section>
       </main>
     </div>
   );
